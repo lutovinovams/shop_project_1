@@ -2,6 +2,7 @@ import pytest
 from src.category import Category
 from src.product import Product
 
+
 @pytest.fixture(autouse=True)
 def reset_category_counters():
     """Фикстура для автоматического сброса счетчиков класса Category перед каждым тестом."""
@@ -34,13 +35,13 @@ def test_product_init():
 
 
 def test_category_init(sample_category):
-    """Тест корректности инициализации объекта класса Category."""
+    """Тест корректности инициализации объекта класса Category и работы обновленного геттера products."""
     assert sample_category.name == "Смартфоны"
     assert sample_category.description == "Мобильные телефоны"
 
     expected_string = (
-        "Samsung Galaxy S23, 80000.0 руб. Остаток: 5 шт.\n"
-        "Iphone 15, 95000.0 руб. Остаток: 3 шт.\n"
+        "Samsung Galaxy S23, 80000 руб. Остаток: 5 шт.\n"
+        "Iphone 15, 95000 руб. Остаток: 3 шт.\n"
     )
     assert sample_category.products == expected_string
 
@@ -149,3 +150,23 @@ def test_new_product_no_match_in_list(sample_category):
 
     assert isinstance(product, Product)
     assert product.name == "Xiaomi 14"
+
+
+def test_product_str():
+    """Тест строкового отображения продукта (метод __str__)."""
+    product_int_price = Product("Samsung Galaxy S23", "Смартфон", 80000.0, 5)
+    product_float_price = Product("Iphone 15", "Смартфон", 95000.5, 3)
+
+    assert str(product_int_price) == "Samsung Galaxy S23, 80000 руб. Остаток: 5 шт."
+    assert str(product_float_price) == "Iphone 15, 95000.5 руб. Остаток: 3 шт."
+
+
+def test_category_str(sample_category):
+    """Тест строкового отображения категории (метод __str__)."""
+    assert str(sample_category) == "Смартфоны, количество продуктов: 8 шт."
+
+
+def test_product_add(sample_products):
+    """Тест магического метода сложения продуктов (__add__)."""
+    prod1, prod2 = sample_products
+    assert prod1 + prod2 == 685000.0

@@ -1,4 +1,4 @@
-from product import Product
+from src.product import Product
 
 
 class Category:
@@ -21,6 +21,11 @@ class Category:
         for product in products:
             self.add_product(product)
 
+    def __str__(self) -> str:
+        """Возвращает строковое отображение категории и общего количества штук товара."""
+        total_quantity = sum(product.quantity for product in self.__products)
+        return f"{self.name}, количество продуктов: {total_quantity} шт."
+
     def add_product(self, product: Product) -> None:
         """Добавляет продукт в приватный список и увеличивает счетчик товаров."""
         self.__products.append(product)
@@ -28,10 +33,10 @@ class Category:
 
     @property
     def products(self) -> str:
-        """Возвращает строку со всеми продуктами в категории по шаблону."""
+        """Возвращает строку со всеми продуктами в категории через преобразование в str."""
         result = ""
         for product in self.__products:
-            result += f"{product.name}, {product.price} руб. Остаток: {product.quantity} шт.\n"
+            result += f"{str(product)}\n"
         return result
 
     @property

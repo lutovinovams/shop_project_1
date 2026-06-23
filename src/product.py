@@ -11,6 +11,15 @@ class Product:
         self.price = price
         self.quantity = quantity
 
+    def __str__(self) -> str:
+        """Возвращает строковое отображение продукта."""
+        display_price = int(self.price) if self.price.is_integer() else self.price
+        return f"{self.name}, {display_price} руб. Остаток: {self.quantity} шт."
+
+    def __add__(self, other) -> float:
+        """Возвращает сумму произведений цены на количество у двух объектов."""
+        return (self.price * self.quantity) + (other.price * other.quantity)
+
     @property
     def price(self) -> float:
         """Геттер для получения значения приватного атрибута цены."""
