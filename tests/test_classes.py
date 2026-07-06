@@ -1,6 +1,11 @@
+import sys
+from pathlib import Path
 import pytest
+
+sys.path.append(str(Path(__file__).resolve().parent.parent))
+
 from src.category import Category
-from src.product import Product
+from src.product import Product, Smartphone, LawnGrass
 
 
 @pytest.fixture(autouse=True)
@@ -55,7 +60,7 @@ def test_category_and_product_count(sample_products):
     assert Category.category_count == 1
     assert Category.product_count == 2
 
-    prod3 = Product("Наушники", "Беспроводные наушники", 5000.0, 2)
+    prod3 = Product("Наушники", "Беспроводные наушники", 500.0, 2)
     Category("Аксессуары", "Гаджеты", [prod3])
 
     assert Category.category_count == 2
@@ -170,3 +175,67 @@ def test_product_add(sample_products):
     """Тест магического метода сложения продуктов (__add__)."""
     prod1, prod2 = sample_products
     assert prod1 + prod2 == 685000.0
+
+
+# ==================== НОВЫЕ ТЕСТЫ ДЛЯ ДОПОЛНИТЕЛЬНОЙ ФУНКЦИОНАЛЬНОСТИ ====================
+
+@pytest.fixture
+def smartphone1():
+    return Smartphone("Samsung S23 Ultra", "256GB", 180000.0, 5, 95.5, "S23 Ultra", 256, "Серый")
+
+
+@pytest.fixture
+def smartphone2():
+    return Smartphone("Iphone 15", "512GB", 210000.0, 2, 98.2, "15", 512, "Черный")
+
+
+@pytest.fixture
+def grass1():
+    return LawnGrass("Газон", "Элитный", 500.0, 20, "Россия", "7 дней", "Зеленый")
+
+
+def test_smartphone_init(smartphone1):
+    """Тест инициализации атрибутов класса Smartphone."""
+    assert smartphone1.name == "Samsung S23 Ultra"
+    assert smartphone1.efficiency == 95.5
+    assert smartphone1.model == "S23 Ultra"
+    assert smartphone1.memory == 256
+    assert smartphone1.color == "Серый"
+
+
+def test_lawngrass_init(grass1):
+    """Тест инициализации атрибутов класса LawnGrass."""
+    assert grass1.name == "Газон"
+    assert grass1.country == "Россия"
+    assert grass1.germination_period == "7 дней"
+    assert grass1.color == "Зеленый"
+
+
+def test_add_same_subclasses(smartphone1, smartphone2):
+    """Тест успешного сложения объектов одного и того же подкласса."""
+    # (180000 * 5) + (210000 * 2) = 900000 + 420000 = 1320000
+    assert smartphone1 + smartphone2 == 1320000.0
+
+
+def test_add_different_classes_raises_type_error(smartphone1, grass1, sample_products):
+    """Тест вызова TypeError при сложении разных классов или подкласса с родителем."""
+    with pytest.raises(TypeError):
+        _ = smartphone1 + grass1
+
+    with pytest.raises(TypeError):
+        _ = smartphone1 + sample_products[0]
+
+
+def test_category_add_subclasses(smartphone1, grass1):
+    """Тест успешного добавления наследников Product в категорию."""
+    category = Category("Разное", "Описание")
+    category.add_product(smartphone1)
+    category.add_product(grass1)
+    assert Category.product_count == 2
+
+
+def test_category_add_invalid_type_raises_type_error():
+    """Тест вызова TypeError при добавлении в категорию некорректных типов данных."""
+    category = Category("Разное", "Описание")
+    with pytest.raises(TypeError):
+        category.add_product("Строковый объект вместо продукта")
