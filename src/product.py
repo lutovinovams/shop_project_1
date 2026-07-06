@@ -1,15 +1,60 @@
-class Product:
+from abc import ABC, abstractmethod
+
+
+class BaseProduct(ABC):
+    """Базовый абстрактный класс для всех продуктов."""
+
+    @abstractmethod
+    def __init__(self, name: str, description: str, price: float, quantity: int) -> None:
+        """Инициализация базового продукта."""
+        pass
+
+    @abstractmethod
+    def __str__(self) -> str:
+        """Абстрактный метод для строкового отображения продукта."""
+        pass
+
+    @property
+    @abstractmethod
+    def price(self) -> float:
+        """Абстрактный геттер для цены."""
+        pass
+
+    @price.setter
+    @abstractmethod
+    def price(self, new_price: float) -> None:
+        """Абстрактный сеттер для цены."""
+        pass
+
+
+class LogMixin:
+    """Класс-миксин для логирования создания объектов."""
+
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+        print(f"Был создан объект: {self.__repr__()}")
+
+    def __repr__(self) -> str:
+        props = ", ".join(
+            [f"'{v}'" if isinstance(v, str) else str(v) for v in self.__dict__.values()]
+        )
+        return f"{self.__class__.__name__}({props})"
+
+
+class Product(LogMixin, BaseProduct):
     """Класс для представления продукта."""
 
     name: str
     description: str
     quantity: int
+    _price: float
 
     def __init__(self, name: str, description: str, price: float, quantity: int) -> None:
         self.name = name
         self.description = description
         self.price = price
         self.quantity = quantity
+        super().__init__(name, description, price, quantity)
 
     def __str__(self) -> str:
         """Возвращает строковое отображение продукта."""
@@ -25,7 +70,7 @@ class Product:
     @property
     def price(self) -> float:
         """Геттер для получения значения приватного атрибута цены."""
-        return self.__price
+        return self._price
 
     @price.setter
     def price(self, new_price: float) -> None:
@@ -34,15 +79,15 @@ class Product:
             print("Цена не должна быть нулевая или отрицательная")
             return
 
-        if hasattr(self, "_Product__price") and new_price < self.__price:
+        if hasattr(self, "_price") and new_price < self._price:
             user_answer = input(
-                f"Вы уверены, что хотите снизить цену с {self.__price} до {new_price} руб.? (y/n): "
+                f"Вы уверены, что хотите снизить цену с {self._price} до {new_price} руб.? (y/n): "
             )
             if user_answer.lower() != "y":
                 print("Изменение цены отменено.")
                 return
 
-        self.__price = new_price
+        self._price = new_price
 
     @classmethod
     def new_product(cls, product_data: dict, current_products: list = None):
@@ -76,11 +121,11 @@ class Smartphone(Product):
         memory: int,
         color: str,
     ) -> None:
-        super().__init__(name, description, price, quantity)
         self.efficiency = efficiency
         self.model = model
         self.memory = memory
         self.color = color
+        super().__init__(name, description, price, quantity)
 
 
 class LawnGrass(Product):
@@ -96,7 +141,7 @@ class LawnGrass(Product):
         germination_period: str,
         color: str,
     ) -> None:
-        super().__init__(name, description, price, quantity)
         self.country = country
         self.germination_period = germination_period
         self.color = color
+        super().__init__(name, description, price, quantity)
