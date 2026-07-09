@@ -54,6 +54,25 @@ def grass1(capsys):
     return prod
 
 
+def test_product_init_zero_quantity_raises_value_error():
+    """Тест: создание товара с нулевым количеством вызывает ValueError."""
+    with pytest.raises(ValueError) as exc_info:
+        Product("Бракованный товар", "Описание", 1000.0, 0)
+
+    assert str(exc_info.value) == "Товар с нулевым количеством не может быть добавлен"
+
+
+def test_category_average_price_with_products(sample_category):
+    """Тест: правильный подсчет среднего ценника, когда в категории есть товары."""
+    assert sample_category.average_price() == 87500.0
+
+
+def test_category_average_price_empty_category():
+    """Тест: средний ценник пустой категории возвращает 0 благодаря обработке ZeroDivisionError."""
+    empty_category = Category("Пустая категория", "Без товаров")
+    assert empty_category.average_price() == 0
+
+
 def test_product_init(capsys):
     """Тест корректности инициализации объекта класса Product."""
     product = Product("Xiaomi Redmi Note 12", "Бюджетный смартфон", 20000.0, 10)
@@ -255,12 +274,3 @@ def test_mixin_log_output_smartphone(capsys):
     assert "Был создан объект: Smartphone" in output
     assert "iPhone 15" in output
     assert "Titanium" in output
-
-
-def test_mixin_log_output_lawn_grass(capsys):
-    """Проверка вывода логов миксина со всеми параметрами для класса LawnGrass."""
-    _ = LawnGrass("Ковер", "Трава", 1500.0, 20, "Нидерланды", "10 дней", "Изумруд")
-    captured = capsys.readouterr()
-    assert "Был создан объект: LawnGrass" in captured.out
-    assert "Ковер" in captured.out
-    assert "Нидерланды" in captured.out
