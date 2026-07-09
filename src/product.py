@@ -31,10 +31,12 @@ class LogMixin:
     """Класс-миксин для логирования создания объектов."""
 
     def __init__(self, *args, **kwargs) -> None:
+        """Инициализация миксина логирования."""
         super().__init__(*args, **kwargs)
         print(f"Был создан объект: {self.__repr__()}")
 
     def __repr__(self) -> str:
+        """Возвращает строковое представление объекта для логирования."""
         props = ", ".join(
             [f"'{v}'" if isinstance(v, str) else str(v) for v in self.__dict__.values()]
         )
@@ -50,6 +52,10 @@ class Product(LogMixin, BaseProduct):
     _price: float
 
     def __init__(self, name: str, description: str, price: float, quantity: int) -> None:
+        """Инициализация продукта с валидацией количества."""
+        if quantity == 0:
+            raise ValueError("Товар с нулевым количеством не может быть добавлен")
+
         self.name = name
         self.description = description
         self.price = price
@@ -121,6 +127,7 @@ class Smartphone(Product):
         memory: int,
         color: str,
     ) -> None:
+        """Инициализация смартфона."""
         self.efficiency = efficiency
         self.model = model
         self.memory = memory
@@ -141,7 +148,30 @@ class LawnGrass(Product):
         germination_period: str,
         color: str,
     ) -> None:
+        """Инициализация газонной травы."""
         self.country = country
         self.germination_period = germination_period
         self.color = color
         super().__init__(name, description, price, quantity)
+
+
+class Category:
+    """Класс для представления категории товаров."""
+
+    def __init__(self, name: str, description: str, products: list = None) -> None:
+        """Инициализация категории."""
+        self.name = name
+        self.description = description
+        self.__products = products if products is not None else []
+
+    def add_product(self, product: Product) -> None:
+        """Добавляет продукт в категорию."""
+        self.__products.append(product)
+
+    def average_price(self) -> float:
+        """Подсчитывает средний ценник всех товаров в категории."""
+        try:
+            total_price = sum(product.price for product in self.__products)
+            return total_price / len(self.__products)
+        except ZeroDivisionError:
+            return 0
